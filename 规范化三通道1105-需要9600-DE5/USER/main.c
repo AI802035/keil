@@ -1,8 +1,6 @@
-#include "led.h"
 #include "delay.h"
 #include "sys.h"
 #include "usart.h"
-#include "lcd.h"
 #include "adc.h"
 #include "dma.h"
 #include <stdarg.h>
@@ -12,33 +10,33 @@
 
 //void Show_other(void);
 //void ShowCH_Voltage(void);
-// ·¢ËsÍ×Ö·?´®
+// å‘è—„å¦¥å€?ä¸²
 char uart2_send_str[100]; 
 char uart3_send_str[100]; 
 extern uint8_t g_usart_rx_buf[USART_REC_LEN];
 uint8_t bussiness_flag = 0;
-/*  ½ÓÊÕ×´Ì¬
- *  bit15£¬      ½ÓÊÕÍê³É±êÖ¾
- *  bit14£¬      ½ÓÊÕµ½0x0d
- *  bit13~0£¬    ½ÓÊÕµ½µÄÓĞĞ§×Ö½ÚÊıÄ¿
+/*  æ¥æ”¶çŠ¶æ€
+ *  bit15ï¼Œ      æ¥æ”¶å®Œæˆæ ‡å¿—
+ *  bit14ï¼Œ      æ¥æ”¶åˆ°0x0d
+ *  bit13~0ï¼Œ    æ¥æ”¶åˆ°çš„æœ‰æ•ˆå­—èŠ‚æ•°ç›®
 */
 extern  uint16_t g_usart_rx_sta;
 extern uint16_t g_usart3_flag;
-// ·¢ËÍµ¥¸ö×Ö·û
+// å‘é€å•ä¸ªå­—ç¬¦
 void USART2_SendChar(char ch)
 {
-    // µÈ´ı·¢ËÍ»º³åÇøÎª¿Õ
+    // ç­‰å¾…å‘é€ç¼“å†²åŒºä¸ºç©º
     while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
-    // ½«Òª·¢ËÍµÄ×Ö·ûĞ´Èë·¢ËÍÊı¾İ¼Ä´æÆ÷
+    // å°†è¦å‘é€çš„å­—ç¬¦å†™å…¥å‘é€æ•°æ®å¯„å­˜å™¨
     USART_SendData(USART2, (uint8_t)ch);
 }
 
-// ·¢ËÍµ¥¸ö×Ö·û
+// å‘é€å•ä¸ªå­—ç¬¦
 void USART3_SendChar(char ch)
 {
-    // µÈ´ı·¢ËÍ»º³åÇøÎª¿Õ
+    // ç­‰å¾…å‘é€ç¼“å†²åŒºä¸ºç©º
     while (USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
-    // ½«Òª·¢ËÍµÄ×Ö·ûĞ´Èë·¢ËÍÊı¾İ¼Ä´æÆ÷
+    // å°†è¦å‘é€çš„å­—ç¬¦å†™å…¥å‘é€æ•°æ®å¯„å­˜å™¨
     USART_SendData(USART3, (uint8_t)ch);
 }
 
@@ -59,34 +57,34 @@ void USART3_SendString(char* str)
 }
 
 void esp8266_Config(void){
-    // 1. ¸´Î»Ä£¿é£¨ĞèµÈ´ıÖØÆôÍê³É£©
+    // 1. å¤ä½æ¨¡å—ï¼ˆéœ€ç­‰å¾…é‡å¯å®Œæˆï¼‰
     USART3_SendString("AT+RST\r\n");
-    delay_ms(1500); // ¸´Î»ºóµÈ´ı2Ãë£¨Ä£¿éÖØÆôÔ¼1~2Ãë£©
+    delay_ms(1500); // å¤ä½åç­‰å¾…2ç§’ï¼ˆæ¨¡å—é‡å¯çº¦1~2ç§’ï¼‰
     
-    // 2. ²âÊÔATÖ¸Áî£¨¿ìËÙÏìÓ¦£¬ÎŞĞè³¤ÑÓ³Ù£©
+    // 2. æµ‹è¯•ATæŒ‡ä»¤ï¼ˆå¿«é€Ÿå“åº”ï¼Œæ— éœ€é•¿å»¶è¿Ÿï¼‰
     USART3_SendString("AT\r\n");    
-    delay_ms(1500);  // ½öĞè500ms¼´¿É½ÓÊÕÏìÓ¦
+    delay_ms(1500);  // ä»…éœ€500mså³å¯æ¥æ”¶å“åº”
     
-    // 3. ¶Ï¿ªµ±Ç°WiFi£¨ÈôÎ´Á¬½Ó£¬¿ìËÙÏìÓ¦£©
+    // 3. æ–­å¼€å½“å‰WiFiï¼ˆè‹¥æœªè¿æ¥ï¼Œå¿«é€Ÿå“åº”ï¼‰
     USART3_SendString("AT+CWQAP\r\n");
     delay_ms(1500);
     
-    // 4. Á¬½ÓWiFi£¨ºÄÊ±×î³¤£¬Ğè×ã¹»ÑÓ³Ù»òÏìÓ¦¼ì²â£©
+    // 4. è¿æ¥WiFiï¼ˆè€—æ—¶æœ€é•¿ï¼Œéœ€è¶³å¤Ÿå»¶è¿Ÿæˆ–å“åº”æ£€æµ‹ï¼‰
     USART3_SendString("AT+CWJAP=\"oneplus\",\"hc123456\"\r\n");
-    delay_ms(1500); // ÑÓ³¤ÖÁ5Ãë£¬Ìá¸ß³É¹¦ÂÊ
+    delay_ms(1500); // å»¶é•¿è‡³5ç§’ï¼Œæé«˜æˆåŠŸç‡
     delay_ms(1500);
     delay_ms(1500);
     delay_ms(1500);
 	delay_ms(1500);
-    // 5. ÉèÖÃ¶àÁ¬½Ó£¨¿ìËÙÏìÓ¦£©
+    // 5. è®¾ç½®å¤šè¿æ¥ï¼ˆå¿«é€Ÿå“åº”ï¼‰
     USART3_SendString("AT+CIPMUX=1\r\n");    
     delay_ms(1500);
     delay_ms(1500);
-    // 6. »ñÈ¡IPµØÖ·£¨ĞèÈ·±£WiFiÒÑÁ¬½Ó£©
+    // 6. è·å–IPåœ°å€ï¼ˆéœ€ç¡®ä¿WiFiå·²è¿æ¥ï¼‰
     USART3_SendString("AT+CIFSR\r\n");    
-    delay_ms(1500); // ÏìÓ¦½Ï¿ì£¬¶ÌÑÓ³Ù¼´¿É
+    delay_ms(1500); // å“åº”è¾ƒå¿«ï¼ŒçŸ­å»¶è¿Ÿå³å¯
     delay_ms(1500);
-    // 7. ÉèÖÃ·şÎñÆ÷¶Ë¿Ú£¨ÀıÈçÉèÖÃÎª8080£©
+    // 7. è®¾ç½®æœåŠ¡å™¨ç«¯å£ï¼ˆä¾‹å¦‚è®¾ç½®ä¸º8080ï¼‰
     USART3_SendString("AT+CIPSERVER=1,3030\r\n");
     delay_ms(1500);
        
@@ -97,13 +95,11 @@ void esp8266_Config(void){
    
 int main(void)
  { 
-	delay_init();	    	 //ÑÓÊ±º¯Êı³õÊ¼»¯	  
-	uart_init(115200);	 	//´®¿Ú³õÊ¼»¯Îª9600
+	delay_init();	    	 //å»¶æ—¶å‡½æ•°åˆå§‹åŒ–	  
+	uart_init(115200);	 	//ä¸²å£åˆå§‹åŒ–ä¸º9600
 	uart2_init(115200);
 	uart3_init(115200);
-	LED_Init();		  		//³õÊ¼»¯ÓëLEDÁ¬½ÓµÄÓ²¼ş½Ó¿Ú
-	LCD_Init();			   	//³õÊ¼»¯LCD 
-	Adc_Init();		  		//ADC³õÊ¼»¯	  
+	Adc_Init();		  		//ADCåˆå§‹åŒ–	  
  	dma_Config(DMA1_Channel1,(u32)&ADC1->DR,(u32)&AD_Value,N*M);
 	printf("*****************system begin***************\r\n");
     esp8266_Config();
@@ -111,7 +107,7 @@ int main(void)
     while(1)
 	{
 
-		while((DMA_GetFlagStatus(DMA1_FLAG_TC1)) == RESET);//Ã¿´Î°áÔËÍê£¬ÔÙ´¦ÀíÊı×éµÃ³öµçÑ¹
+		while((DMA_GetFlagStatus(DMA1_FLAG_TC1)) == RESET);//æ¯æ¬¡æ¬è¿å®Œï¼Œå†å¤„ç†æ•°ç»„å¾—å‡ºç”µå‹
 		printf("%d#%d#%d#1000#\r\n",AD_Value[0][0],AD_Value[0][1],AD_Value[0][2]);
 		sprintf(uart2_send_str,"%d,%d,%d,",AD_Value[0][0],AD_Value[0][1],AD_Value[0][2]);
         sprintf(uart3_send_str,"%4d#%4d#%4d#1000",AD_Value[0][0],AD_Value[0][1],AD_Value[0][2]);
@@ -130,21 +126,21 @@ int main(void)
 //{
 //	int i=0,j=0;
 //	float temp,SUM;
-//	for(j=0;j<M;j++)//M£¬Í¨µÀ¸öÊı
+//	for(j=0;j<M;j++)//Mï¼Œé€šé“ä¸ªæ•°
 //	 { 
-//		for(i=0;i<N;i++)//N£¬Ã¿¸öÍ¨µÀ²ÉÑù´ÎÊı
+//		for(i=0;i<N;i++)//Nï¼Œæ¯ä¸ªé€šé“é‡‡æ ·æ¬¡æ•°
 //		 {
-//	      SUM+=AD_Value[i][j]; //Ã¿¸öÍ¨µÀµÄÊı¾İÇóºÍ£¬×¢ÒâÊÇ¶şÎ¬Êı×éµÄÃ¿ÁĞµÄÊı¾İÇóºÍ
+//	      SUM+=AD_Value[i][j]; //æ¯ä¸ªé€šé“çš„æ•°æ®æ±‚å’Œï¼Œæ³¨æ„æ˜¯äºŒç»´æ•°ç»„çš„æ¯åˆ—çš„æ•°æ®æ±‚å’Œ
 //		 }
-//		Average[j]=SUM/N; //ÔÙÈ¡Æ½¾ù
+//		Average[j]=SUM/N; //å†å–å¹³å‡
 //		temp=(float)Average[j]*(3.3/4096.0);
 //		Average[j]=temp;
-//		LCD_ShowxNum(144,40+30*j,Average[j],1,24,0);//ÏÔÊ¾µçÑ¹ÖµµÄÕûÊı²¿·Ö
+//		LCD_ShowxNum(144,40+30*j,Average[j],1,24,0);//æ˜¾ç¤ºç”µå‹å€¼çš„æ•´æ•°éƒ¨åˆ†
 //		temp-=Average[j];
 //		temp*=10000;
-//		LCD_ShowxNum(144+24,40+30*j,temp,4,24,0X80);//ÏÔÊ¾µçÑ¹ÖµµÄĞ¡Êı²¿·Ö
-//		Average[j]=0;//¿ªÖÚÌáĞÑÖÃÁã
-//		SUM=0;//¿ªÖÚÌáĞÑÖÃÁã
+//		LCD_ShowxNum(144+24,40+30*j,temp,4,24,0X80);//æ˜¾ç¤ºç”µå‹å€¼çš„å°æ•°éƒ¨åˆ†
+//		Average[j]=0;//å¼€ä¼—æé†’ç½®é›¶
+//		SUM=0;//å¼€ä¼—æé†’ç½®é›¶
 //	 } 
 //}
 
@@ -152,13 +148,13 @@ int main(void)
 //{
 //	int j=0;
 //	u8 ADC_Ch[20];
-//	POINT_COLOR=MAGENTA;//ÉèÖÃ×ÖÌåÎª×ÏÉ« 
+//	POINT_COLOR=MAGENTA;//è®¾ç½®å­—ä½“ä¸ºç´«è‰² 
 //	LCD_ShowString(20,15,200,24,24,"8 Channel ADC+DMA");
-//	show_sentence24_24(20,275,200,24,24,"°ô°ô¹§Ï²³É¹¦");
+//	show_sentence24_24(20,275,200,24,24,"æ£’æ£’æ­å–œæˆåŠŸ");
 //	LCD_ShowString(120,295,200,24,24,"2020/12/4");	
 //	for(j=0;j<M;j++)
 //	{
-//		sprintf((char*)ADC_Ch,"ADC_CH%d_VOL:0.0000V",j);//½«int±äÁ¿j´òÓ¡µ½ADC_ChÊı×é¡£	
+//		sprintf((char*)ADC_Ch,"ADC_CH%d_VOL:0.0000V",j);//å°†intå˜é‡jæ‰“å°åˆ°ADC_Chæ•°ç»„ã€‚	
 //		LCD_ShowString(0,40+30*j,240,24,24,ADC_Ch);
 //	}
 //}
@@ -191,10 +187,10 @@ int main(void)
 ////#include "adc.h"
 ////#include "stm32f10x.h" 
 ////#include <stdio.h>
-////#define N 3//Ã¿Í¨µÀ²É10´Î
-////#define M 3 //Îª3¸öÍ¨µÀ
-////vu16 AD_Value[N][M]; //ÓÃÀ´´æ·ÅADC×ª»»½á¹û£¬Ò²ÊÇDMAµÄÄ¿±êµØÖ·
-////vu16 After_filter[M]; //ÓÃÀ´´æ·ÅÇóÆ½¾ùÖµÖ®ºóµÄ½á¹û
+////#define N 3//æ¯é€šé“é‡‡10æ¬¡
+////#define M 3 //ä¸º3ä¸ªé€šé“
+////vu16 AD_Value[N][M]; //ç”¨æ¥å­˜æ”¾ADCè½¬æ¢ç»“æœï¼Œä¹Ÿæ˜¯DMAçš„ç›®æ ‡åœ°å€
+////vu16 After_filter[M]; //ç”¨æ¥å­˜æ”¾æ±‚å¹³å‡å€¼ä¹‹åçš„ç»“æœ
 
 
 //// void u32tostr1(unsigned long dat,char *str);
@@ -206,14 +202,14 @@ int main(void)
 //// int main(void)
 //// {	 
 
-////	u16 value[M];  //M¸öÍ¨µÀ
+////	u16 value[M];  //Mä¸ªé€šé“
 ////	 char temp1[10];
 ////	 char temp2[10];
 ////	 char temp3[10];
-////	delay_init();	    	 //ÑÓÊ±º¯Êı³õÊ¼»¯	  
-////	uart_init(115200);	 	//´®¿Ú³õÊ¼»¯Îª115200
-//// 	LED_Init();			     //LED¶Ë¿Ú³õÊ¼»¯			 	
-//// 	Adc_Init();		  		//ADC³õÊ¼»¯
+////	delay_init();	    	 //å»¶æ—¶å‡½æ•°åˆå§‹åŒ–	  
+////	uart_init(115200);	 	//ä¸²å£åˆå§‹åŒ–ä¸º115200
+//// 	LED_Init();			     //LEDç«¯å£åˆå§‹åŒ–			 	
+//// 	Adc_Init();		  		//ADCåˆå§‹åŒ–
 
 ////	//while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);  
 
@@ -225,7 +221,7 @@ int main(void)
 //////	  u32tostr(adcx,temp);
 //////	 	printf("%s#",temp);
 ////	//	printf("%d#",adcx);
-////		while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET); //µÈ´ı´«ÊäÍê³É·ñÔòµÚÒ»Î»Êı¾İÈİÒ×¶ªÊ§
+////		while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET); //ç­‰å¾…ä¼ è¾“å®Œæˆå¦åˆ™ç¬¬ä¸€ä½æ•°æ®å®¹æ˜“ä¸¢å¤±
 ////	//	 filter();
 ////	 
 //////       value[0]= AD_Value[0][0];  u32tostr1(value[0],temp1);  // 	printf("%s#",temp1);
@@ -264,11 +260,11 @@ int main(void)
 ////      float sum = 0;
 ////      u8 count;
 ////		  int i;
-////    for(i=0;i<M;i++)  //¶ÔÃ¿Ò»¸öÍ¨µÀ¶øÑÔM
+////    for(i=0;i<M;i++)  //å¯¹æ¯ä¸€ä¸ªé€šé“è€Œè¨€M
 
 ////     {
 
-////      for ( count=0;count<N;count++)   //N²ÉÑù¶àÉÙ´Î£¬MÍ¨µÀÊı
+////      for ( count=0;count<N;count++)   //Né‡‡æ ·å¤šå°‘æ¬¡ï¼ŒMé€šé“æ•°
 
 ////      {
 
@@ -346,19 +342,19 @@ int main(void)
 //// 
 //	V_TAO=(float)ADCConvertedValue*(3.3/4096)*1000;
 
-//#include "stm32f10x.h" //Õâ¸öÍ·ÎÄ¼ş°üÀ¨STM32F10xËùÓĞÍâÎ§¼Ä´æÆ÷¡¢Î»¡¢ÄÚ´æÓ³ÉäµÄ¶¨Òå
-////#include "eval.h" //Í·ÎÄ¼ş£¨°üÀ¨´®¿Ú¡¢°´¼ü¡¢LEDµÄº¯ÊıÉùÃ÷£©
+//#include "stm32f10x.h" //è¿™ä¸ªå¤´æ–‡ä»¶åŒ…æ‹¬STM32F10xæ‰€æœ‰å¤–å›´å¯„å­˜å™¨ã€ä½ã€å†…å­˜æ˜ å°„çš„å®šä¹‰
+////#include "eval.h" //å¤´æ–‡ä»¶ï¼ˆåŒ…æ‹¬ä¸²å£ã€æŒ‰é”®ã€LEDçš„å‡½æ•°å£°æ˜ï¼‰
 ////#include "SysTickDelay.h"
 ////#include "UART_INTERFACE.h"
 //#include <stdio.h>
 
-//#define N 50 //Ã¿Í¨µÀ²É50´Î
-//#define M 3 //Îª3¸öÍ¨µÀ
+//#define N 50 //æ¯é€šé“é‡‡50æ¬¡
+//#define M 3 //ä¸º3ä¸ªé€šé“
 
 //__IO uint16_t ADCConvertedValue;	//ADC DMA  buffer
 
-//vu16 AD_Value[N][M]; //ÓÃÀ´´æ·ÅADC×ª»»½á¹û£¬Ò²ÊÇDMAµÄÄ¿±êµØÖ·
-//vu16 After_filter[M]; //ÓÃÀ´´æ·ÅÇóÆ½¾ùÖµÖ®ºóµÄ½á¹û
+//vu16 AD_Value[N][M]; //ç”¨æ¥å­˜æ”¾ADCè½¬æ¢ç»“æœï¼Œä¹Ÿæ˜¯DMAçš„ç›®æ ‡åœ°å€
+//vu16 After_filter[M]; //ç”¨æ¥å­˜æ”¾æ±‚å¹³å‡å€¼ä¹‹åçš„ç»“æœ
 //int i;
 // 
 // void GPIO_Configuration(void)
@@ -366,7 +362,7 @@ int main(void)
 //GPIO_InitTypeDef GPIO_InitStructure;
 
 //GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
-//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; //ÒòÎªUSART1¹Ü½ÅÊÇÒÔ¸´ÓÃµÄĞÎÊ½½Óµ½GPIO¿ÚÉÏµÄ£¬ËùÒÔÊ¹ÓÃ¸´ÓÃÍÆÍìÊ½Êä³ö
+//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; //å› ä¸ºUSART1ç®¡è„šæ˜¯ä»¥å¤ç”¨çš„å½¢å¼æ¥åˆ°GPIOå£ä¸Šçš„ï¼Œæ‰€ä»¥ä½¿ç”¨å¤ç”¨æ¨æŒ½å¼è¾“å‡º
 //GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 //GPIO_Init(GPIOA, &GPIO_InitStructure);
 
@@ -377,19 +373,19 @@ int main(void)
 
 
 
-////PA0/1/2 ×÷ÎªÄ£ÄâÍ¨µÀÊäÈëÒı½Å
+////PA0/1/2 ä½œä¸ºæ¨¡æ‹Ÿé€šé“è¾“å…¥å¼•è„š
 //GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0| GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3;
-//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //Ä£ÄâÊäÈëÒı½Å
+//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //æ¨¡æ‹Ÿè¾“å…¥å¼•è„š
 //GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-////PB0/1 ×÷ÎªÄ£ÄâÍ¨µÀÊäÈëÒı½Å
+////PB0/1 ä½œä¸ºæ¨¡æ‹Ÿé€šé“è¾“å…¥å¼•è„š
 //GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1;
-//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //Ä£ÄâÊäÈëÒı½Å
+//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //æ¨¡æ‹Ÿè¾“å…¥å¼•è„š
 //GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-////PC0/1/2/3/4/5 ×÷ÎªÄ£ÄâÍ¨µÀÊäÈëÒı½Å
+////PC0/1/2/3/4/5 ä½œä¸ºæ¨¡æ‹Ÿé€šé“è¾“å…¥å¼•è„š
 //GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5;
-//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //Ä£ÄâÊäÈëÒı½Å
+//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //æ¨¡æ‹Ÿè¾“å…¥å¼•è„š
 //GPIO_Init(GPIOC, &GPIO_InitStructure);
 //}
 
@@ -399,9 +395,9 @@ int main(void)
 //{
 //ErrorStatus HSEStartUpStatus;
 
-//RCC_DeInit(); //RCC ÏµÍ³¸´Î»
-//RCC_HSEConfig(RCC_HSE_ON); //¿ªÆôHSE
-//HSEStartUpStatus = RCC_WaitForHSEStartUp(); //µÈ´ıHSE×¼±¸ºÃ
+//RCC_DeInit(); //RCC ç³»ç»Ÿå¤ä½
+//RCC_HSEConfig(RCC_HSE_ON); //å¼€å¯HSE
+//HSEStartUpStatus = RCC_WaitForHSEStartUp(); //ç­‰å¾…HSEå‡†å¤‡å¥½
 //if(HSEStartUpStatus == SUCCESS)
 //{
 //FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable); //Enable Prefetch Buffer
@@ -416,10 +412,10 @@ int main(void)
 //while(RCC_GetSYSCLKSource() != 0x08); //Wait till PLL is used as system clock source
 
 //RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB
-//| RCC_APB2Periph_GPIOC |RCC_APB2Periph_ADC1 | RCC_APB2Periph_AFIO |RCC_APB2Periph_USART1, ENABLE ); //Ê¹ÄÜADC1Í¨µÀÊ±ÖÓ£¬¸÷¸ö¹Ü½ÅÊ±ÖÓ
+//| RCC_APB2Periph_GPIOC |RCC_APB2Periph_ADC1 | RCC_APB2Periph_AFIO |RCC_APB2Periph_USART1, ENABLE ); //ä½¿èƒ½ADC1é€šé“æ—¶é’Ÿï¼Œå„ä¸ªç®¡è„šæ—¶é’Ÿ
 
-//RCC_ADCCLKConfig(RCC_PCLK2_Div6); //72M/6=12,ADC×î´óÊ±¼ä²»ÄÜ³¬¹ı14M
-//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE); //Ê¹ÄÜDMA´«Êä
+//RCC_ADCCLKConfig(RCC_PCLK2_Div6); //72M/6=12,ADCæœ€å¤§æ—¶é—´ä¸èƒ½è¶…è¿‡14M
+//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE); //ä½¿èƒ½DMAä¼ è¾“
 
 //}
 //}
@@ -429,20 +425,20 @@ int main(void)
 //{
 //ADC_InitTypeDef ADC_InitStructure;
 
-//ADC_DeInit(ADC1); //½«ÍâÉè ADC1 µÄÈ«²¿¼Ä´æÆ÷ÖØÉèÎªÈ±Ê¡Öµ
+//ADC_DeInit(ADC1); //å°†å¤–è®¾ ADC1 çš„å…¨éƒ¨å¯„å­˜å™¨é‡è®¾ä¸ºç¼ºçœå€¼
 
 
-//ADC_InitStructure.ADC_Mode = ADC_Mode_Independent; //ADC¹¤×÷Ä£Ê½:ADC1ºÍADC2¹¤×÷ÔÚ¶ÀÁ¢Ä£Ê½
-//ADC_InitStructure.ADC_ScanConvMode =ENABLE; //Ä£Êı×ª»»¹¤×÷ÔÚÉ¨ÃèÄ£Ê½
-//ADC_InitStructure.ADC_ContinuousConvMode = ENABLE; //Ä£Êı×ª»»¹¤×÷ÔÚÁ¬Ğø×ª»»Ä£Ê½
-//ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None; //Íâ²¿´¥·¢×ª»»¹Ø±Õ
-//ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right; //ADCÊı¾İÓÒ¶ÔÆë
-//ADC_InitStructure.ADC_NbrOfChannel = M; //Ë³Ğò½øĞĞ¹æÔò×ª»»µÄADCÍ¨µÀµÄÊıÄ¿
-//ADC_Init(ADC1, &ADC_InitStructure); //¸ù¾İADC_InitStructÖĞÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯ÍâÉèADCxµÄ¼Ä´æÆ÷
+//ADC_InitStructure.ADC_Mode = ADC_Mode_Independent; //ADCå·¥ä½œæ¨¡å¼:ADC1å’ŒADC2å·¥ä½œåœ¨ç‹¬ç«‹æ¨¡å¼
+//ADC_InitStructure.ADC_ScanConvMode =ENABLE; //æ¨¡æ•°è½¬æ¢å·¥ä½œåœ¨æ‰«ææ¨¡å¼
+//ADC_InitStructure.ADC_ContinuousConvMode = ENABLE; //æ¨¡æ•°è½¬æ¢å·¥ä½œåœ¨è¿ç»­è½¬æ¢æ¨¡å¼
+//ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None; //å¤–éƒ¨è§¦å‘è½¬æ¢å…³é—­
+//ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right; //ADCæ•°æ®å³å¯¹é½
+//ADC_InitStructure.ADC_NbrOfChannel = M; //é¡ºåºè¿›è¡Œè§„åˆ™è½¬æ¢çš„ADCé€šé“çš„æ•°ç›®
+//ADC_Init(ADC1, &ADC_InitStructure); //æ ¹æ®ADC_InitStructä¸­æŒ‡å®šçš„å‚æ•°åˆå§‹åŒ–å¤–è®¾ADCxçš„å¯„å­˜å™¨
 
 
-////ÉèÖÃÖ¸¶¨ADCµÄ¹æÔò×éÍ¨µÀ£¬ÉèÖÃËüÃÇµÄ×ª»¯Ë³ĞòºÍ²ÉÑùÊ±¼ä
-////ADC1,ADCÍ¨µÀx,¹æÔò²ÉÑùË³ĞòÖµÎªy,²ÉÑùÊ±¼äÎª239.5ÖÜÆÚ
+////è®¾ç½®æŒ‡å®šADCçš„è§„åˆ™ç»„é€šé“ï¼Œè®¾ç½®å®ƒä»¬çš„è½¬åŒ–é¡ºåºå’Œé‡‡æ ·æ—¶é—´
+////ADC1,ADCé€šé“x,è§„åˆ™é‡‡æ ·é¡ºåºå€¼ä¸ºy,é‡‡æ ·æ—¶é—´ä¸º239.5å‘¨æœŸ
 //ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_239Cycles5 );
 //ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_239Cycles5 );
 //ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 3, ADC_SampleTime_239Cycles5 );
@@ -456,20 +452,20 @@ int main(void)
 //ADC_RegularChannelConfig(ADC1, ADC_Channel_14, 11, ADC_SampleTime_239Cycles5 );
 //ADC_RegularChannelConfig(ADC1, ADC_Channel_15, 12, ADC_SampleTime_239Cycles5 );
 
-//// ¿ªÆôADCµÄDMAÖ§³Ö£¨ÒªÊµÏÖDMA¹¦ÄÜ£¬»¹Ğè¶ÀÁ¢ÅäÖÃDMAÍ¨µÀµÈ²ÎÊı£©
+//// å¼€å¯ADCçš„DMAæ”¯æŒï¼ˆè¦å®ç°DMAåŠŸèƒ½ï¼Œè¿˜éœ€ç‹¬ç«‹é…ç½®DMAé€šé“ç­‰å‚æ•°ï¼‰
 //ADC_DMACmd(ADC1, ENABLE);
 
 
-//ADC_Cmd(ADC1, ENABLE); //Ê¹ÄÜÖ¸¶¨µÄADC1
+//ADC_Cmd(ADC1, ENABLE); //ä½¿èƒ½æŒ‡å®šçš„ADC1
 
-//ADC_ResetCalibration(ADC1); //¸´Î»Ö¸¶¨µÄADC1µÄĞ£×¼¼Ä´æÆ÷
+//ADC_ResetCalibration(ADC1); //å¤ä½æŒ‡å®šçš„ADC1çš„æ ¡å‡†å¯„å­˜å™¨
 
-//while(ADC_GetResetCalibrationStatus(ADC1)); //»ñÈ¡ADC1¸´Î»Ğ£×¼¼Ä´æÆ÷µÄ×´Ì¬,ÉèÖÃ×´Ì¬ÔòµÈ´ı
+//while(ADC_GetResetCalibrationStatus(ADC1)); //è·å–ADC1å¤ä½æ ¡å‡†å¯„å­˜å™¨çš„çŠ¶æ€,è®¾ç½®çŠ¶æ€åˆ™ç­‰å¾…
 
 
-//ADC_StartCalibration(ADC1); //¿ªÊ¼Ö¸¶¨ADC1µÄĞ£×¼×´Ì¬
+//ADC_StartCalibration(ADC1); //å¼€å§‹æŒ‡å®šADC1çš„æ ¡å‡†çŠ¶æ€
 
-//while(ADC_GetCalibrationStatus(ADC1)); //»ñÈ¡Ö¸¶¨ADC1µÄĞ£×¼³ÌĞò,ÉèÖÃ×´Ì¬ÔòµÈ´ı
+//while(ADC_GetCalibrationStatus(ADC1)); //è·å–æŒ‡å®šADC1çš„æ ¡å‡†ç¨‹åº,è®¾ç½®çŠ¶æ€åˆ™ç­‰å¾…
 
 
 //}
@@ -479,25 +475,25 @@ int main(void)
 //{
 
 //DMA_InitTypeDef DMA_InitStructure;
-//DMA_DeInit(DMA1_Channel1); //½«DMAµÄÍ¨µÀ1¼Ä´æÆ÷ÖØÉèÎªÈ±Ê¡Öµ
-//DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)&ADC1->DR; //DMAÍâÉèADC»ùµØÖ·
-//DMA_InitStructure.DMA_MemoryBaseAddr = (u32)&AD_Value; //DMAÄÚ´æ»ùµØÖ·
-//DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC; //ÄÚ´æ×÷ÎªÊı¾İ´«ÊäµÄÄ¿µÄµØ
-//DMA_InitStructure.DMA_BufferSize = N*M; //DMAÍ¨µÀµÄDMA»º´æµÄ´óĞ¡
-//DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; //ÍâÉèµØÖ·¼Ä´æÆ÷²»±ä
-//DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable; //ÄÚ´æµØÖ·¼Ä´æÆ÷µİÔö
-//DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord; //Êı¾İ¿í¶ÈÎª16Î»
-//DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord; //Êı¾İ¿í¶ÈÎª16Î»
-//DMA_InitStructure.DMA_Mode = DMA_Mode_Circular; //¹¤×÷ÔÚÑ­»·»º´æÄ£Ê½
-//DMA_InitStructure.DMA_Priority = DMA_Priority_High; //DMAÍ¨µÀ xÓµÓĞ¸ßÓÅÏÈ¼¶
-//DMA_InitStructure.DMA_M2M = DMA_M2M_Disable; //DMAÍ¨µÀxÃ»ÓĞÉèÖÃÎªÄÚ´æµ½ÄÚ´æ´«Êä
-//DMA_Init(DMA1_Channel1, &DMA_InitStructure); //¸ù¾İDMA_InitStructÖĞÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯DMAµÄÍ¨µÀ
+//DMA_DeInit(DMA1_Channel1); //å°†DMAçš„é€šé“1å¯„å­˜å™¨é‡è®¾ä¸ºç¼ºçœå€¼
+//DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)&ADC1->DR; //DMAå¤–è®¾ADCåŸºåœ°å€
+//DMA_InitStructure.DMA_MemoryBaseAddr = (u32)&AD_Value; //DMAå†…å­˜åŸºåœ°å€
+//DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC; //å†…å­˜ä½œä¸ºæ•°æ®ä¼ è¾“çš„ç›®çš„åœ°
+//DMA_InitStructure.DMA_BufferSize = N*M; //DMAé€šé“çš„DMAç¼“å­˜çš„å¤§å°
+//DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; //å¤–è®¾åœ°å€å¯„å­˜å™¨ä¸å˜
+//DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable; //å†…å­˜åœ°å€å¯„å­˜å™¨é€’å¢
+//DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord; //æ•°æ®å®½åº¦ä¸º16ä½
+//DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord; //æ•°æ®å®½åº¦ä¸º16ä½
+//DMA_InitStructure.DMA_Mode = DMA_Mode_Circular; //å·¥ä½œåœ¨å¾ªç¯ç¼“å­˜æ¨¡å¼
+//DMA_InitStructure.DMA_Priority = DMA_Priority_High; //DMAé€šé“ xæ‹¥æœ‰é«˜ä¼˜å…ˆçº§
+//DMA_InitStructure.DMA_M2M = DMA_M2M_Disable; //DMAé€šé“xæ²¡æœ‰è®¾ç½®ä¸ºå†…å­˜åˆ°å†…å­˜ä¼ è¾“
+//DMA_Init(DMA1_Channel1, &DMA_InitStructure); //æ ¹æ®DMA_InitStructä¸­æŒ‡å®šçš„å‚æ•°åˆå§‹åŒ–DMAçš„é€šé“
 
 //}
 
 
 
-////ÅäÖÃËùÓĞÍâÉè
+////é…ç½®æ‰€æœ‰å¤–è®¾
 //void Init_All_Periph(void)
 //{
 
@@ -511,7 +507,7 @@ int main(void)
 
 ////USART1_Configuration();
 ////USART_Configuration(9600);
-//	uart_init(115200);	 	//´®¿Ú³õÊ¼»¯Îª115200
+//	uart_init(115200);	 	//ä¸²å£åˆå§‹åŒ–ä¸º115200
 
 
 //}
@@ -522,7 +518,7 @@ int main(void)
 
 //{
 
-//return (u16)(advalue * 330 / 4096); //ÇóµÄ½á¹ûÀ©´óÁË100±¶£¬·½±ãÏÂÃæÇó³öĞ¡Êı
+//return (u16)(advalue * 330 / 4096); //æ±‚çš„ç»“æœæ‰©å¤§äº†100å€ï¼Œæ–¹ä¾¿ä¸‹é¢æ±‚å‡ºå°æ•°
 
 //}
 
@@ -533,11 +529,11 @@ int main(void)
 //{
 //int sum = 0;
 //u8 count;
-//for(i=0;i<12;i++)  //¶ÔÃ¿Ò»¸öÍ¨µÀ¶øÑÔM
+//for(i=0;i<12;i++)  //å¯¹æ¯ä¸€ä¸ªé€šé“è€Œè¨€M
 
 //{
 
-//for ( count=0;count<N;count++)   //N²ÉÑù¶àÉÙ´Î£¬MÍ¨µÀÊı
+//for ( count=0;count<N;count++)   //Né‡‡æ ·å¤šå°‘æ¬¡ï¼ŒMé€šé“æ•°
 
 //{
 
@@ -558,19 +554,19 @@ int main(void)
 //int main(void)
 //{
 
-//u16 value[M];  //M¸öÍ¨µÀ
+//u16 value[M];  //Mä¸ªé€šé“
 
-//delay_init();	    	 //ÑÓÊ±º¯Êı³õÊ¼»¯	  
-////NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//ÉèÖÃÖĞ¶ÏÓÅÏÈ¼¶·Ö×éÎª×é2£º2Î»ÇÀÕ¼ÓÅÏÈ¼¶£¬2Î»ÏìÓ¦ÓÅÏÈ¼¶
+//delay_init();	    	 //å»¶æ—¶å‡½æ•°åˆå§‹åŒ–	  
+////NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//è®¾ç½®ä¸­æ–­ä¼˜å…ˆçº§åˆ†ç»„ä¸ºç»„2ï¼š2ä½æŠ¢å ä¼˜å…ˆçº§ï¼Œ2ä½å“åº”ä¼˜å…ˆçº§
 ////init_All_Periph();
 ////SysTick_Initaize();
 
 
 //ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-//DMA_Cmd(DMA1_Channel1, ENABLE); //Æô¶¯DMAÍ¨µÀ
+//DMA_Cmd(DMA1_Channel1, ENABLE); //å¯åŠ¨DMAé€šé“
 //while(1)
 //{
-//while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);//µÈ´ı´«ÊäÍê³É·ñÔòµÚÒ»Î»Êı¾İÈİÒ×¶ªÊ§
+//while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);//ç­‰å¾…ä¼ è¾“å®Œæˆå¦åˆ™ç¬¬ä¸€ä½æ•°æ®å®¹æ˜“ä¸¢å¤±
 
 //filter();
 //for(i=0;i<12;i++)
